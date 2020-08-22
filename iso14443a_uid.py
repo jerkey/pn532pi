@@ -23,7 +23,7 @@ if SPI:
     nfc = Pn532(PN532_SPI)
 # When the number after #elif set as 1, it will be switch to HSU Mode
 elif HSU:
-    PN532_HSU = Pn532Hsu(0)
+    PN532_HSU = Pn532Hsu('/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0')
     nfc = Pn532(PN532_HSU)
 
 # When the number after #if & #elif set as 0, it will be switch to I2C Mode
