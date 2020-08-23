@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
     This example will attempt to connect to an ISO14443A
     card or tag and retrieve some basic information about it
@@ -8,10 +9,11 @@
 import time
 import binascii
 
-from pn532pi import Pn532, pn532
-from pn532pi import Pn532I2c
-from pn532pi import Pn532Spi
-from pn532pi import Pn532Hsu
+from pn532pi.nfc.pn532 import Pn532
+import pn532pi.nfc.pn532 as pn532
+# from pn532pi import Pn532I2c
+# from pn532pi import Pn532Spi
+from pn532pi.interfaces.pn532hsu import Pn532Hsu
 
 # Set the desired interface to True
 SPI = False
