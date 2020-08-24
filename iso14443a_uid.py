@@ -63,15 +63,14 @@ def loop():
     success, uid = nfc.readPassiveTargetID(pn532.PN532_MIFARE_ISO14443A_106KBPS)
 
     if (success):
-        print("Found a card!")
+        print("Found a card!                                                                ")
         print("UID Length: {:d}".format(len(uid)))
         print("UID Value: {}".format(binascii.hexlify(uid)))
         # Wait 1 second before continuing
-        time.sleep(1)
         return True
     else:
         # pn532 probably timed out waiting for a card
-        print("Timed out waiting for a card")
+        print(str(time.time())+" Timed out waiting for a card",end='\r')
         return False
 
 
