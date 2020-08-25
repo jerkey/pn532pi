@@ -13,8 +13,8 @@ accessfile = open('access.list','r')
 logfile = open('/tmp/'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.log','w')
 
 PN532_HSU = Pn532Hsu('/dev/ttyUSB0')
-PN532_HSU._serial.setRTS(False)
-PN532_HSU._serial.setDTR(False)
+PN532_HSU._serial.setRTS(False) # keep RTS pin high (3.3v) when program starts
+PN532_HSU._serial.setDTR(False) # keep DTR pin high (3.3v) when program starts
 nfc = Pn532(PN532_HSU)
 
 accesslist = {}
@@ -64,10 +64,19 @@ def loop():
         uid_str = str(binascii.hexlify(uid)).split('\'')[1]
         if uid_str in accesslist:
             logwrite("UID Value: {} is {} and {}".format(uid_str, accesslist[uid_str][0], accesslist[uid_str][1]))
+            if accesslist[uid_str][1] == 'grant':
+                PN532_HSU._serial.setRTS(True) # start the beeper
+                PN532_HSU._serial.setDTR(True) # energize the solenoid
+                time.sleep(1) # Wait before stopping the beeper
+                PN532_HSU._serial.setRTS(False)
+                time.sleep(7) # Wait before de-energizing the solenoid
+                PN532_HSU._serial.setDTR(False)
+            else:
+                logwrite("not granting access to UID Value: {} because {} != \'grant\'".format(uid_str, accesslist[uid_str][1]))
+                time.sleep(5) # Wait before continuing
         else:
             logwrite("UID Value: UNRECOGNIZED {}".format(binascii.hexlify(uid)))
-        # Wait 5 seconds before continuing
-        time.sleep(5)
+            time.sleep(5) # Wait before continuing
         return True
     else:
         # pn532 probably timed out waiting for a card
