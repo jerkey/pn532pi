@@ -8,10 +8,20 @@ from pn532pi.nfc.pn532 import Pn532
 import pn532pi.nfc.pn532 as pn532
 from pn532pi.interfaces.pn532hsu import Pn532Hsu
 
+accessfile = open('access.list','r')
+
 logfile = open('/tmp/'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.log','w')
 
-PN532_HSU = Pn532Hsu('/dev/ttyUSB0')
-nfc = Pn532(PN532_HSU)
+nfc = Pn532(Pn532Hsu('/dev/ttyUSB0'))
+
+accesslist = []
+
+def loadaccessfile():
+    for line in accessfile:
+        if line.split(' ')[-1][0:2] == "b'":
+            accesslist.append(bytearray.fromhex(line.split(' ')[-1].split('\'')[1]))
+        else:
+            logwrite('skipping accessfile line: '+line[:-1]) # don't log the \n at the end of the line
 
 def logwrite(record):
     print(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'	'+record)
@@ -49,7 +59,10 @@ def loop():
     if (success):
         print("Found a card!                                                                ")
         print("UID Length: {:d}".format(len(uid)))
-        logwrite("UID Value: {}".format(binascii.hexlify(uid)))
+        if uid in accesslist:
+            logwrite("UID Value: {} ACCESS GRANTED".format(binascii.hexlify(uid)))
+        else:
+            logwrite("UID Value: {} UNRECOGNIZED".format(binascii.hexlify(uid)))
         # Wait 5 seconds before continuing
         time.sleep(5)
         return True
@@ -60,6 +73,8 @@ def loop():
 
 
 if __name__ == '__main__':
+    loadaccessfile()
+    logwrite('loaded accessfile.list with '+str(len(accesslist))+' records')
     setup()
     while True:
         loop()
