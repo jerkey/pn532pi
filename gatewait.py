@@ -12,7 +12,10 @@ accessfile = open('access.list','r')
 
 logfile = open('/tmp/'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.log','w')
 
-nfc = Pn532(Pn532Hsu('/dev/ttyUSB0'))
+PN532_HSU = Pn532Hsu('/dev/ttyUSB0')
+PN532_HSU._serial.setRTS(False)
+PN532_HSU._serial.setDTR(False)
+nfc = Pn532(PN532_HSU)
 
 accesslist = {}
 

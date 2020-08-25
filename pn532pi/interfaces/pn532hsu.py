@@ -13,11 +13,10 @@ class Pn532Hsu(Pn532Interface):
 
     def __init__(self, port: str):
         self._serial = Serial(port, baudrate=115200, timeout=100)
-        self._serial.close()
         self.command = 0
-    
+
     def begin(self):
-        self._serial.open()
+        self.command = 0 # just a placeholder, nothing to do here
     
     def wakeup(self):
         self._serial.write(PN532_WAKEUP)
