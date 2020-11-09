@@ -86,7 +86,7 @@ def loop():
 
 if __name__ == '__main__':
     loadaccessfile()
-    logwrite('loaded accessfile.list with '+str(len(accesslist))+' records')
+    logwrite('loaded access.list with '+str(len(accesslist))+' records')
     setup()
     while True:
         loop()
