@@ -8,11 +8,11 @@ from pn532pi.nfc.pn532 import Pn532
 import pn532pi.nfc.pn532 as pn532
 from pn532pi.interfaces.pn532hsu import Pn532Hsu
 
-accessfile = open('access.list','r')
+accessfile = open('/home/pi/pn532pi/access.list','r')
 
 logfile = open('/tmp/'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.log','w')
 
-PN532_HSU = Pn532Hsu('/dev/ttyUSB0')
+PN532_HSU = Pn532Hsu('/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0')
 PN532_HSU._serial.setRTS(False) # keep RTS pin high (3.3v) when program starts
 PN532_HSU._serial.setDTR(False) # keep DTR pin high (3.3v) when program starts
 nfc = Pn532(PN532_HSU)
