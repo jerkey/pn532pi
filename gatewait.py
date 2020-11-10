@@ -52,6 +52,12 @@ def setup():
 
     logwrite("Waiting for an ISO14443A card")
 
+def bleepForSeconds(howManySeconds):
+    for bleeps in range(howManySeconds):
+        time.sleep(0.9)
+        PN532_HSU._serial.setRTS(True) # start the beeper
+        time.sleep(0.1)
+        PN532_HSU._serial.setRTS(False) # stop the beeper
 
 def loop():
     # Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
@@ -68,8 +74,8 @@ def loop():
                 PN532_HSU._serial.setRTS(True) # start the beeper
                 PN532_HSU._serial.setDTR(True) # energize the solenoid
                 time.sleep(1) # Wait before stopping the beeper
-                PN532_HSU._serial.setRTS(False)
-                time.sleep(7) # Wait before de-energizing the solenoid
+                PN532_HSU._serial.setRTS(False) # stop the beeper
+                bleepForSeconds(7) # Wait before de-energizing the solenoid
                 PN532_HSU._serial.setDTR(False)
             else:
                 logwrite("not granting access to UID Value: {} because {} != \'grant\'".format(uid_str, accesslist[uid_str][1]))
