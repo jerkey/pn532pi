@@ -3,10 +3,15 @@
 import time
 import binascii
 import datetime
+import serial
 
 from pn532pi.nfc.pn532 import Pn532
 import pn532pi.nfc.pn532 as pn532
 from pn532pi.interfaces.pn532hsu import Pn532Hsu
+
+keypad = serial.Serial(port='/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UART_Bridge_Controller_00897CCA-if00-port0', baudrate=57600)
+keypadString = '' # used to build up strings from key pad
+lastKeyTime = time.time() # initialize global variable
 
 accessfile = open('/home/pi/pn532pi/access.list','r')
 
@@ -52,6 +57,24 @@ def setup():
 
     logwrite("Waiting for an ISO14443A card")
 
+def handleKeypad():
+    global keypadString, lastKeyTime
+    while keypad.in_waiting:
+        lastKeyTime = time.time()
+        key = chr(keypad.read(1)[0]) # read a single byte from the buffer
+        if key == '\r': # arduino Serial.println() terminates lines with \r\n
+            keypad.read(1) # swallow the \n from the arduino
+            ksf = keypadString.find('found in record') # record number comes after "record"
+            if ksf >= 0:
+                logwrite("code " + keypadString[ksf:]) # truncate everything before "found in record"
+                keypadString = '' # clear the string so it doesn't get printed
+                bleepForSeconds(7) # make the bleeping sound while latch is held by arduino
+        else:
+            keypadString += key
+    if len(keypadString) and time.time() - lastKeyTime > 5: # from ENTRYCODETIMEOUT in doorkeypad.ino
+        logwrite("keypad: " + keypadString)
+        keypadString = ''
+
 def bleepForSeconds(howManySeconds):
     for bleeps in range(howManySeconds):
         time.sleep(0.9)
@@ -86,7 +109,8 @@ def loop():
         return True
     else:
         # pn532 probably timed out waiting for a card
-        print(str(time.time())+" Timed out waiting for a card                 ",end='\r')
+        #print(str(time.time())+" Timed out waiting for a card                 ",end='\r')
+        handleKeypad()
         return False
 
 
