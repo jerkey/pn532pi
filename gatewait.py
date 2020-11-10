@@ -102,9 +102,11 @@ def loop():
                 PN532_HSU._serial.setDTR(False)
             else:
                 logwrite("not granting access to UID Value: {} because {} != \'grant\'".format(uid_str, accesslist[uid_str][1]))
+                keypad.write(b"S") # tell keypad to make a sad tone
                 time.sleep(5) # Wait before continuing
         else:
             logwrite("UID Value: UNRECOGNIZED {}".format(binascii.hexlify(uid)))
+            keypad.write(b"S") # tell keypad to make a sad tone
             time.sleep(5) # Wait before continuing
         return True
     else:
