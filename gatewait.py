@@ -50,7 +50,7 @@ def setup():
     # Set the max number of retry attempts to read from a card
     # This prevents us from waiting forever for a card, which is
     # the default behaviour of the pn532.
-    nfc.setPassiveActivationRetries(0xFF)
+    nfc.setPassiveActivationRetries(0x7F)
 
     # configure board to read RFID tags
     nfc.SAMConfig()
@@ -86,6 +86,12 @@ def loop():
     # Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
     # 'uid' will be populated with the UID, and uidLength will indicate
     # if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
+# PN532_MIFARE_ISO14443A_106KBPS      = (0x00)
+# PN532_FELICA_212KBPS                = (0x01)
+# PN532_FELICA_424KBPS                = (0x02)
+# PN532_MIFARE_ISO14443B_106KBPS      = (0x03)
+# PN532_JEWEL_106KBPS                 = (0x04)
+   #success, uid = nfc.readPassiveTargetID(pn532.PN532_MIFARE_ISO14443A_106KBPS)
     success, uid = nfc.readPassiveTargetID(pn532.PN532_MIFARE_ISO14443A_106KBPS)
 
     if (success):
@@ -112,6 +118,10 @@ def loop():
     else:
         # pn532 probably timed out waiting for a card
         #print(str(time.time())+" Timed out waiting for a card                 ",end='\r')
+        #print(".", end='', flush=True)
+        #for i in range(25):
+        #    print(nfc.readRegister(i), end='	', flush=True)
+        #print()
         handleKeypad()
         return False
 
