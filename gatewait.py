@@ -102,9 +102,10 @@ def loop():
             if accesslist[uid_str][1] == 'grant':
                 PN532_HSU._serial.setRTS(True) # start the beeper
                 PN532_HSU._serial.setDTR(True) # energize the solenoid
+                keypad.write(b"H") # tell keypad to make a happy tone
                 time.sleep(1) # Wait before stopping the beeper
                 PN532_HSU._serial.setRTS(False) # stop the beeper
-                bleepForSeconds(7) # Wait before de-energizing the solenoid
+                bleepForSeconds(3) # Wait before de-energizing the solenoid
                 PN532_HSU._serial.setDTR(False)
             else:
                 logwrite("not granting access to UID Value: {} because {} != \'grant\'".format(uid_str, accesslist[uid_str][1]))
