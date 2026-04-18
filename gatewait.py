@@ -32,7 +32,7 @@ def loadaccessfile():
             logwrite('skipping accessfile line: '+line[:-1]) # don't log the \n at the end of the line
 
 def logwrite(record):
-    print(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'	'+record)
+    print(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'	'+record, flush=True)
     logfile.write(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'	'+record+'\n')
     logfile.flush()
 
