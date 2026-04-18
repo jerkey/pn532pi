@@ -4,6 +4,7 @@ import time
 import binascii
 import datetime
 import serial
+import os
 
 from pn532pi.nfc.pn532 import Pn532
 import pn532pi.nfc.pn532 as pn532
@@ -13,7 +14,8 @@ keypad = serial.Serial(port='/dev/serial/by-id/usb-Silicon_Labs_CP2104_USB_to_UA
 keypadString = '' # used to build up strings from key pad
 lastKeyTime = time.time() # initialize global variable
 
-accessfile = open('/home/pi/pn532pi/access.list','r')
+accessFileName = '/home/pi/pn532pi/access.list'
+loadedAccessFileTime = 0.0 # store the modification time of the access file we have loaded (done by loadaccessfile)
 
 logfile = open('/tmp/'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'.log','w')
 
@@ -25,11 +27,18 @@ nfc = Pn532(PN532_HSU)
 accesslist = {}
 
 def loadaccessfile():
-    for line in accessfile:
-        if line.split(' ')[-1][0:2] == "b'":
-            accesslist[line.split(' ')[-1].split('\'')[1]] = line.split(' ')[-3:-1] # key is text of UID, store two things before it
-        else:
-            logwrite('skipping accessfile line: '+line[:-1]) # don't log the \n at the end of the line
+    global accesslist, loadedAccessFileTime
+    accessFileTime = os.path.getmtime(accessFileName)
+    if accessFileTime > loadedAccessFileTime:
+        loadedAccessFileTime = accessFileTime # update loadedAccessFileTime
+        accessfile = open(accessFileName,'r')
+        accesslist = {} # clear accesslist in case it was previously loaded
+        for line in accessfile:
+            if line.split(' ')[-1][0:2] == "b'":
+                accesslist[line.split(' ')[-1].split('\'')[1].lower()] = line.split(' ')[-3:-1] # key is text of UID, store two things before it
+            else:
+                logwrite('skipping accessfile line: '+line[:-1]) # don't log the \n at the end of the line
+        logwrite('loaded access.list with '+str(len(accesslist))+' records')
 
 def logwrite(record):
     print(datetime.datetime.now().strftime('%Y%m%d-%H%M%S')+'	'+record, flush=True)
@@ -92,6 +101,7 @@ def loop():
 # PN532_MIFARE_ISO14443B_106KBPS      = (0x03)
 # PN532_JEWEL_106KBPS                 = (0x04)
    #success, uid = nfc.readPassiveTargetID(pn532.PN532_MIFARE_ISO14443A_106KBPS)
+    loadaccessfile() # only loads if accessfile is newer than whats in accesslist
     success, uid = nfc.readPassiveTargetID(pn532.PN532_MIFARE_ISO14443A_106KBPS)
 
     if (success):
@@ -128,8 +138,6 @@ def loop():
 
 
 if __name__ == '__main__':
-    loadaccessfile()
-    logwrite('loaded access.list with '+str(len(accesslist))+' records')
     setup()
     while True:
         loop()
